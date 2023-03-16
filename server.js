@@ -92,8 +92,7 @@ socket.on("JOIN_ROOM",function(_pack){
 	rotation:'0',
 	kills:0,
 	isMasterClient:'false',
-	isDead:false,
-	isMute:false
+	isDead:false
 	
   };
   
@@ -457,44 +456,6 @@ socket.on('GET_BEST_KILLERS',function(pack){
   
 
 });//END_SOCKET.ON
-
-socket.on("VOICE", function (data) {
-
-
-  if(current_player)
-  {
-    
-    
-    var newData = data.split(";");
-    newData[0] = "data:audio/ogg;";
-    newData = newData[0] + newData[1];
-
-     
-    clients.forEach(function(u) {
-     
-      if(sockets[u.id]&&u.id!= current_player.id&&!u.isMute)
-      {
-    
-      sockets[u.id].emit('UPDATE_VOICE',newData);
-      }
-    });
-    
-    
-
-  }
- 
-});
-
-socket.on("AUDIO_MUTE", function (data) {
-
-
-if(current_player)
-{
-  current_player.isMute = !current_player.isMute;
-
-}
-
-});
 
 socket.on('disconnect', function ()
 	{
