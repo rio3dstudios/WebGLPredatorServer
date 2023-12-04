@@ -98,6 +98,7 @@ socket.on("JOIN_ROOM",function(_pack){
   
   
   console.log("[INFO] player " + current_player.id + ": logged!");
+   
   
   sockets[current_player.id] = socket;//add curent user socket
   
@@ -117,6 +118,7 @@ socket.on("JOIN_ROOM",function(_pack){
 		    if(i.id!=current_player.id)
 			{ 
 			   console.log("i.position: "+i.position);
+			
 		      //send to the client.js script
 		      socket.emit('SPAWN_PLAYER',i.id,i.name,i.avatar,i.position);
 			  
@@ -232,34 +234,7 @@ socket.on("RESPAWN",function(_pack){
 	   
 		if(powerUpLookup[pack.id])
 		{
-		    current_player.xp +=  3;
-			
-			
-			if(current_player.xp >=100)
-			{// evolution
-			  
-			  //evolution
-			  if(current_player.avatar == '0')
-			  { //evolution to leon
-			    current_player.xp = 0;
-				current_player.avatar = '1';
-							    
-			  }
-			  else if( current_player.avatar == '1')
-			  { // evolution to crocodille
-			    current_player.xp = 0;
-				current_player.avatar = '2';
-			  }
-			  else if( current_player.avatar == '2')
-			  { // evolution to crocodille, but player is already a croccodille so do nothing ;)
-			    current_player.xp = 0;
-				current_player.avatar = '2';
-			  }
-			   
-			   socket.emit('UPDATE_EVOLUTION', current_player.id,current_player.avatar);
-                    socket.broadcast.emit('UPDATE_EVOLUTION', current_player.id,current_player.avatar);
-			  
-			}
+		    current_player.xp +=  1;
 			
 			delete powerUpLookup[pack.id];// delete power up
 			
@@ -315,31 +290,6 @@ socket.on("RESPAWN",function(_pack){
     });
 
 	
-	
- socket.on('REGRESSION', function(_pack) {
-      
-	var _data= JSON.parse(_pack);
-	if(current_player)
-    {
-	 
-	    if( current_player.avatar == '1')
-		{ // regression form leon to antelope
-			current_player.xp = 0;
-		    current_player.avatar = '0';
-	    }
-	    else if( current_player.avatar == '2')
-		{ // regression from crocodille to lion
-			current_player.xp = 0;
-			current_player.avatar = '1';
-		}
-			  
-	    socket.emit('UPDATE_REGRESSION',current_player.id,current_player.avatar);
-        socket.broadcast.emit('UPDATE_REGRESSION', current_player.id,current_player.avatar);
-			  
-	}//END_IF
-				
-			
-    });//END_SOCKET.IO
 
  
 socket.on("POS_AND_ROT",function(_pack){
@@ -374,66 +324,31 @@ socket.on('PLAYER_DAMAGE',function(_pack){
    var target = clientLookup[pack.id];
    
    // if current player is an antilope and target is a leon
-   if(current_player.avatar == '0' && target.avatar == '1')
+   if(current_player.xp < target.xp)
    { 
       target.kills +=1;
 	  
-      socket.emit('GAME_OVER',current_player.id);
-	  
-	  socket.broadcast.emit('GAME_OVER',current_player.id);
-    
-   }
-    // if current player is an antilope and target is a crocodille
-   else if(current_player.avatar == '0' && target.avatar == '2')
-   {
-      target.kills +=1;
+	  current_player.xp =0;
 	  
       socket.emit('GAME_OVER',current_player.id);
 	  
 	  socket.broadcast.emit('GAME_OVER',current_player.id);
     
    }
-    // if current player is anleon and target is a crocodille
-   else if(current_player.avatar == '1' && target.avatar == '2' )
-   {
-      target.kills +=1;
-	  
-      socket.emit('GAME_OVER',current_player.id);
-	  
-	  socket.broadcast.emit('GAME_OVER',current_player.id);
-   
-   }
-    // if current player is an leon and target is a antelope
-   else if(current_player.avatar == '1' && target.avatar == '0')
+
+   else 
    {
       
      current_player.kills +=1;
 	 
-      socket.emit('GAME_OVER',target.id);
+	 target.xp = 0;
+	 
+     socket.emit('GAME_OVER',target.id);
 	  
-	  socket.broadcast.emit('GAME_OVER',target.id);
+	 socket.broadcast.emit('GAME_OVER',target.id);
    
    }
-    // if current player is an crocodille and target is an antelope or  if current player is an crocodille and target is an leon
-   else if( current_player.avatar == '2' && target.avatar == '0' || current_player.avatar == '2' && target.avatar == '1')
-   {
-      current_player.kills +=1;
-	  
-      socket.emit('GAME_OVER',target.id);
-	  
-	  socket.broadcast.emit('GAME_OVER',target.id);
    
-   }
-    // if current player is an crocodileand target is a leon
-    else if( current_player.avatar == '2' && target.avatar == '1')
-   {
-      current_player.kills +=1;
-	  
-      socket.emit('GAME_OVER',target.id);
-	  
-	  socket.broadcast.emit('GAME_OVER',target.id);
-   
-   }
   
   }//END_IF
   
